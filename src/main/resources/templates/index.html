@@ -21,6 +21,10 @@
 <div class="container">
     <h1>✂️ Acortador de URLs</h1>
 
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="/stats" style="color: #3498db; text-decoration: none; font-weight: bold;">📊 Ver Panel de Estadísticas</a>
+    </div>
+
     <form th:action="@{/acortar-web}" method="POST">
         <input type="url" name="urlLarga" placeholder="Pega tu URL larga aquí (ej: https://google.com)" required>
         <br>
@@ -31,6 +35,7 @@
         <p><strong>¡Listo! Tu URL acortada es:</strong></p>
         <p><a th:href="${urlAcortada}" target="_blank" th:text="${urlAcortada}">http://localhost:8080/xxxxxx</a></p>
     </div>
+
 </div>
 
 </body>

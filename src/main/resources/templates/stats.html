@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Estadísticas - Acortador de URLs</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        h1 { color: #2c3e50; margin: 0; font-size: 24px; }
+        .btn-home { background-color: #3498db; color: white; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; }
+        .btn-home:hover { background-color: #2980b9; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid #eef2f5; font-size: 14px; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f8fafc; }
+
+        .url-link { color: #2563eb; text-decoration: none; font-weight: 500; }
+        .url-link:hover { text-decoration: underline; }
+        .text-muted { color: #94a3b8; font-style: italic; }
+
+        /* Badges de Estado */
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .badge-active { background-color: #dcfce7; color: #166534; }
+        .badge-expired { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📊 Panel de Control de URLs</h1>
+        <a href="/" class="btn-home">➕ Acortar Nueva URL</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Código</th>
+            <th>URL Original</th>
+            <th>Clics</th>
+            <th>Fecha Creación</th>
+            <th>Último Clic</th>
+            <th>Estado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Bucle Thymeleaf para recorrer la lista de URLs -->
+        <tr th:each="mapping : ${listaUrls}">
+            <td>
+                <a th:href="@{'/' + ${mapping.id}}" class="url-link" target="_blank" th:text="${mapping.id}">abc123</a>
+            </td>
+            <td th:text="${mapping.urlLarga}" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">https://ejemplo.com</td>
+            <td><strong th:text="${mapping.clics}">0</strong></td>
+            <td th:text="${#temporals.format(mapping.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</td>
+            <td>
+                <span th:if="${mapping.fechaUltimoClic != null}" th:text="${#temporals.format(mapping.fechaUltimoClic, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:05</span>
+                <span th:if="${mapping.fechaUltimoClic == null}" class="text-muted">Sin clics</span>
+            </td>
+            <td>
+                <!-- Lógica visual: Si la fecha actual es posterior a la creación + tiempo de caducidad -->
+                <span th:if="${mapping.fechaCreacion != null and #temporals.createNow().isAfter(mapping.fechaCreacion.plusDays(7))}" class="badge badge-expired">Caducado</span>
+                <span th:if="${mapping.fechaCreacion != null and not #temporals.createNow().isAfter(mapping.fechaCreacion.plusDays(7))}" class="badge badge-active">Activo</span>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(listaUrls)}">
+            <td colspan="6" style="text-align: center; color: #64748b; padding: 30px;">
+                Aún no has creado ningún enlace acortado. ¡Crea el primero!
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

@@ -64,4 +64,12 @@ public class WebController {
     public String mostrarEnlaceCaducado(){
         return "expired";
     }
+
+    // 📊 Mapea la vista del Dashboard de Estadísticas
+    @GetMapping("/stats")
+    public String mostrarEstadisticas(Model model) {
+        // Consultamos la lista completa de enlaces en la base de datos
+        model.addAttribute("listaUrls", urlRepository.findAll());
+        return "stats";
+    }
 }
