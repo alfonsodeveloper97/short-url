@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,19 +40,24 @@ public class UrlController {
     }
 
     @GetMapping("/{idCorto}")
-    public ResponseEntity<Void> redireccionar(@PathVariable String idCorto) {
-        // 3. Buscamos en la Base de Datos usando el ID corto
-        Optional<UrlMapping> mapping = urlRepository.findById(idCorto);
+    public Object redireccionar(@PathVariable String idCorto) {
+        Optional<UrlMapping> mappingOptional = urlRepository.findById(idCorto);
 
-        if (mapping.isPresent()) {
-            // Si existe, redirigimos a la URL larga original
-            String urlLarga = mapping.get().getUrlLarga();
+        if (mappingOptional.isPresent()) {
+            UrlMapping mapping = mappingOptional.get();
+
+            // 📊 Actualizamos el contador y la fecha del último clic
+            mapping.setClics(mapping.getClics() + 1);
+            mapping.setFechaUltimoClic(LocalDateTime.now()); // 🕒 Registramos la hora exacta del clic
+
+            urlRepository.save(mapping);
+
+            String urlLarga = mapping.getUrlLarga();
             return ResponseEntity.status(HttpStatus.FOUND)
                     .location(URI.create(urlLarga))
                     .build();
         } else {
-            // Si no existe el código, devolvemos un 404 (No encontrado)
-            return ResponseEntity.notFound().build();
+            return "redirect:/404";
         }
     }
 }

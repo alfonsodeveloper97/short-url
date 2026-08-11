@@ -5,7 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import java.util.Optional;
 import java.util.UUID;
 
 @Controller // Usamos @Controller (no @RestController) porque vamos a enviar páginas HTML
@@ -27,18 +27,27 @@ public class WebController {
     @PostMapping("/acortar-web")
     public String acortarDesdeWeb(@RequestParam String urlLarga, Model model) {
 
-        // Generamos el ID corto idéntico a como lo hacíamos antes
-        String idCorto = UUID.randomUUID().toString().substring(0, 6);
+        Optional<UrlMapping> existente = urlRepository.findByUrlLarga(urlLarga);
 
-        // Guardamos en la misma base de datos H2
-        UrlMapping mapping = new UrlMapping(idCorto, urlLarga);
-        urlRepository.save(mapping);
-
+        String idCorto;
+        if (existente.isPresent()) {
+            //Si ya existe , rescatamos el antiguo ID y asi no guardamos nada nuevo.
+            idCorto = existente.get().getId();
+        } else {
+            //Si es una ID nueva, generamos ID nueva y se guarda.
+            idCorto = UUID.randomUUID().toString().substring(0, 6);
+            // Guardamos en la misma base de datos H2
+            UrlMapping mapping = new UrlMapping(idCorto, urlLarga);
+            urlRepository.save(mapping);
+        }
         String urlAcortada = "http://localhost:8080/" + idCorto;
-
         // Le pasamos la URL acortada al HTML para que la pinte en la caja azul
         model.addAttribute("urlAcortada", urlAcortada);
-
         return "index"; // Volvemos a mostrar la página index.html pero ahora con el resultado
+    }
+    // Mapea la URL física /404 para que no salga el Whitelabel Error Page
+    @GetMapping("/404")
+    public String mostrarError404() {
+        return "404"; // Redirige directamente al archivo 404.html de templates
     }
 }
