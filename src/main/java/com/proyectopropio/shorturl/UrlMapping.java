@@ -17,7 +17,7 @@ public class UrlMapping {
     private int clics = 0;
 
     // 📅 NUEVOS CAMPOS: Guardan las fechas en la base de datos
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
     private LocalDateTime fechaUltimoClic;
 
     // ⚠️ Constructor vacío: Es OBLIGATORIO para que Hibernate funcione entre bambalinas

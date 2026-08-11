@@ -1,5 +1,7 @@
 package com.proyectopropio.shorturl; // Tu package real
 
+import com.proyectopropio.shorturl.UrlMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 
 @RestController
 public class UrlController {
@@ -46,7 +49,25 @@ public class UrlController {
         if (mappingOptional.isPresent()) {
             UrlMapping mapping = mappingOptional.get();
 
-            // 📊 Actualizamos el contador y la fecha del último clic
+            // ⏳ COMPROBACIÓN DE CADUCIDAD: ¿Tiene más de 2 minutos de vida?
+            //Verificamos que la fechaCreacion NO sea null antes de operar
+            // (Para producción podrías cambiar .plusMinutes(2) por .plusDays(7))
+            if (mapping.getFechaCreacion() !=null) {
+                LocalDateTime fechaCaducidad = mapping.getFechaCreacion().plusDays(7);
+                System.out.println("🕒 Hora actual: " + LocalDateTime.now());
+                System.out.println("⏳ Hora caducidad: " + fechaCaducidad);
+                if (LocalDateTime.now().isAfter(fechaCaducidad)) {
+                    System.out.println("❌ ENLACE CADUCADO - Redirigiendo a /expired");
+                    return ResponseEntity.status(HttpStatus.FOUND)
+                            .location(URI.create("http://localhost:8080/expired"))
+                            .build();
+                }
+            }
+
+
+
+            // Si NO ha caducado, sumamos el clic y registramos la fecha
+            System.out.println("✅ ENLACE VÁLIDO - Redirigiendo a URL original");
             mapping.setClics(mapping.getClics() + 1);
             mapping.setFechaUltimoClic(LocalDateTime.now()); // 🕒 Registramos la hora exacta del clic
 
@@ -57,7 +78,9 @@ public class UrlController {
                     .location(URI.create(urlLarga))
                     .build();
         } else {
-            return "redirect:/404";
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create("http://localhost:8080/404"))
+                    .build();
         }
     }
 }

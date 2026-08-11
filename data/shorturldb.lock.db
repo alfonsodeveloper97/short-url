@@ -1,6 +1,6 @@
 #FileLock
-#Tue Aug 11 10:55:58 CEST 2026
+#Tue Aug 11 12:23:58 CEST 2026
 hostName=DESKTOP-DH9QFGQ
-id=19ff00920fac2b138a07eb35fbad790263b4ea87553
+id=19ff059b1cc7adf7845c39fee5c53d54843d0af677b
 method=file
-server=192.168.1.42\:62669
+server=192.168.1.42\:57311

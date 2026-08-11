@@ -1,10 +1,13 @@
 package com.proyectopropio.shorturl; // Tu package real
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,7 +35,12 @@ public class WebController {
         String idCorto;
         if (existente.isPresent()) {
             //Si ya existe , rescatamos el antiguo ID y asi no guardamos nada nuevo.
+            UrlMapping mapping = existente.get();
             idCorto = existente.get().getId();
+            // 🔄 Si el enlace antiguo no tenía fecha o ya había caducado, renovamos su fecha de creación
+            mapping.setFechaCreacion(LocalDateTime.now());
+            urlRepository.save(mapping);
+
         } else {
             //Si es una ID nueva, generamos ID nueva y se guarda.
             idCorto = UUID.randomUUID().toString().substring(0, 6);
@@ -49,5 +57,11 @@ public class WebController {
     @GetMapping("/404")
     public String mostrarError404() {
         return "404"; // Redirige directamente al archivo 404.html de templates
+    }
+
+    //Mapea la vista de enlace caducado
+    @GetMapping("/expired")
+    public String mostrarEnlaceCaducado(){
+        return "expired";
     }
 }
